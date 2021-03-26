@@ -22,10 +22,10 @@ $ bluetoothd -v
 ```
   - does not advertise local name (a bug in bluez / not implemented?)
   - advertises as dual mode device (can't be changed)
-
-  You need to enable experimental features (-E flag) of bluez, 
-  sudo vi /lib/systemd/system/bluetooth.service 
-  ExecStart=/usr/lib/bluetooth/bluetoothd -E
+  - necessary to enable experimental features (-E flag) of bluez, 
+    ```sudo vi /lib/systemd/system/bluetooth.service```
+    and add the -E flag according to this line
+    ```ExecStart=/usr/lib/bluetooth/bluetoothd -E```
 
 Raspberry PI buster:
 ```console
