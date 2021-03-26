@@ -6,6 +6,8 @@ from bluezero import async_tools
 from bluezero import adapter
 from bluezero import peripheral
 
+from gpiozero import CPUTemperature
+
 # Custom 128-bit service uuid (can be generated at https://www.uuidgenerator.net/)
 CPU_TMP_SRVC = '9941f656-8e3e-11eb-8dcd-0242ac130003'
 
@@ -32,6 +34,10 @@ class TempCharacteristic:
         This routine does a mock reading CPU temperature callback.
         """
         temp = random.randrange(3200, 5310, 10) / 100.0
+
+        cpu = CPUTemperature()
+        temp = cpu.temperature
+
         if self.unit.is_farenheit():
             temp = (temp * 1.8) + 32
         return temp
