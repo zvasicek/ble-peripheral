@@ -1,2 +1,2 @@
 # Overview
-This folder contains implementation of Bluetooth peripheral for Raspberry Pi platform.
+This folder contains various implementations of the same Bluetooth peripheral for Raspberry Pi platform.
