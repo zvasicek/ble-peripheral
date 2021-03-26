@@ -1,0 +1,251 @@
+<!doctype html>
+<html class="wf-loading">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>BLE example</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+</head>
+<style>
+    .bg-purple {
+        background-color: #6f42c1;
+    }
+
+    .text-purple {
+        color: #6f42c1;
+    }
+
+    .text-purple2 {
+        color: #e83e8c;
+    }
+
+    .material-icons.md-18 {
+        font-size: 18px;
+        vertical-align: middle !important;
+        max-width: 20px
+    }
+
+    .material-icons.md-24 {
+        font-size: 24px;
+    }
+
+    .material-icons.md-36 {
+        font-size: 36px;
+    }
+
+    .material-icons.md-48 {
+        font-size: 48px;
+    }
+
+    .wf-loading .material-icons,
+    .wf-materialicons-n4-inactive .material-icons {
+        text-indent: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        display: inline-block;
+
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='100%25' viewBox='0 0 24 24' width='100%25'%3E%3Cpath fill='%23AAAAAA' d='M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z' /%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        max-width: 32px;
+    }
+</style>
+<script>
+    window.WebFontConfig = {
+        google: {
+            families: [
+                'Material Icons',
+            ],
+        },
+    };
+    (function (d) {
+        var wf = d.createElement('script'), s = d.scripts[0];
+        wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js';
+        wf.async = true;
+        s.parentNode.insertBefore(wf, s);
+    })(document);
+</script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+<script>
+    function log(msg) {
+        $('#log').append('<div>' + msg + '</div>');
+    }
+
+    function state(msg) {
+        $('#state').html(msg);
+        if (msg == 'Connected') {
+            $('#connect').hide();
+            $('#disconnect').show();
+        } else {
+            $('#disconnect').hide();
+            $('#connect').show();
+            $('.jumbotron').hide();
+        }
+    }
+
+    var bluetoothDevice, tempCharacteristic, unitCharacteristic, tempService, actualUnit;
+
+
+    function showtemp(value) {
+        let temperature = value.getInt16(0, true /* little endian */) / 100.0;
+        let u = actualUnit;
+        if (value.byteLength >= 3) { //16-bit value followed by unit
+            u = (String.fromCharCode(value.getUint8(2)) == 'F') ? 'F' : 'C'
+        }
+
+        //log('> Temperature is ' + temperature + ' ' + u);
+        $('#temp').html(temperature.toFixed(2) + ' ' + u);
+        $('.jumbotron').show();
+    }
+
+
+    function setunit(unit) {
+        if (unitCharacteristic) {
+            log('Writing value to Temp Characteristic...');
+            let val = Uint8Array.of(unit.charCodeAt(0));
+            actualUnit = '';
+            unitCharacteristic.writeValue(val).then(_ => {
+                actualUnit = unit;
+            })
+        } else {
+            log('Temp Characteristic not available');
+        }
+    }
+
+    function disconnect() {
+        log('Disconnecting from Bluetooth Device...');
+        if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+            bluetoothDevice.gatt.disconnect();
+        }
+    }
+
+    const TMP_SRVC = '9941f656-8e3e-11eb-8dcd-0242ac130003';
+    const UNIT_CHAR = '9941fb38-8e3e-11eb-8dcd-0242ac130003';
+
+    function connect() {
+
+        log('Requesting Bluetooth Device...');
+        state('Not connected');
+        navigator.bluetooth.requestDevice(
+            {
+                filters: [
+                    //        {services: ['battery_service']},
+                    { services: [TMP_SRVC] },
+                    { name: 'Thermometer' },
+                ]
+            })
+            .then(device => {
+                log('Connecting to GATT Server...');
+
+                state('Connecting');
+                bluetoothDevice = device;
+                device.addEventListener('gattserverdisconnected', event => {
+                    state('Not connected');
+                    log('GATT Server disconnected...');
+                });
+
+                return device.gatt.connect();
+            })
+            .then(server => {
+                log('Getting Temp Service...');
+                state('Connected');
+                return server.getPrimaryService(TMP_SRVC);
+            })
+
+            .then(service => {
+                log('Getting Unit Characteristic...');
+                tempService = service;
+                return service.getCharacteristic(UNIT_CHAR);
+            })
+            .then(characteristic => {
+                log('Reading current unit ...');
+                unitCharacteristic = characteristic;
+                return unitCharacteristic.readValue();
+            })
+            .then(value => {
+                actualUnit = (String.fromCharCode(value.getInt8(0)) == 'F') ? 'F' : 'C'
+                //log('Unit ' + actualUnit);
+                return tempService;
+            })
+
+            .then(service => {
+                //For predefined UUIDs please see https://github.com/oesmith/gatt-xml
+                log('Getting Temp Characteristic...');
+                return service.getCharacteristic('temperature');
+            })
+            .then(characteristic => {
+                log('Enabling notifications ...');
+                tempCharacteristic = characteristic;
+                return tempCharacteristic.startNotifications().then(_ => {
+                    log('> Notifications started');
+                    tempCharacteristic.addEventListener('characteristicvaluechanged',
+                        event => {
+                            // handleNotifications
+                            let value = event.target.value;
+                            showtemp(value);
+                        });
+                });
+            })
+
+            .catch(error => {
+                log('Argh! ' + error);
+            });
+    }
+</script>
+
+<body class="bg-light">
+
+    <main role="main" class="container">
+        <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded shadow-sm">
+            <div class="lh-100 mr-auto">
+                <h6 class="mb-0 text-white lh-100">Bluetooth LE Thermometer Demo</h6>
+                <small id="state">Not connected</small>
+            </div>
+
+            <div class="buttons">
+                <button id="connect" class="btn btn-outline-light" aria-label="Connect" onclick="connect()">
+                    <i class="material-icons">bluetooth_connected</i>
+                </button>
+
+                <button id="disconnect" class="btn btn-outline-light" style="display:none" aria-label="Disconnect"
+                    onclick="disconnect()">
+                    <i class="material-icons">bluetooth_disabled</i>
+                </button>
+            </div>
+        </div>
+
+        <div class="jumbotron jumbotron-fluid" style="display:none">
+            <div class="container">
+                <h1 class="display-4" id="temp"> </h1>
+                <p class="lead">This is the actual temperature reported by the sensor. You can change the unit by
+                    writting to the unit characteristic.</p>
+                <a class="btn btn-outline-secondary btn-md" href="#" role="button" onclick="setunit('C')">Change unit to
+                    <span>Celsius</span></a>
+                <a class="btn btn-outline-secondary btn-md" href="#" role="button" onclick="setunit('F')">Change unit to
+                    <span>Farenheit</span></a>
+            </div>
+        </div>
+
+
+        <div id="log">
+        </div>
+
+    </main>
+
+</body>
+
+</html>
