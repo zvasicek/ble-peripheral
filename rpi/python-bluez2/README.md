@@ -17,4 +17,4 @@ $ sudo python3 main.py
 ```
 
 # LIMITATIONS
-Please see the python-bluez/README.md
+Please see the [python-bluez/README.md](../python-bluez/README.md)
