@@ -1,5 +1,5 @@
 # DESCRIPTION
-GO implementation uses Host Controller Interface (HCI), it does not depend on the availability and version of Bluez stack.
+GO implementation uses Host Controller Interface (HCI), it does not depend either on the availability, or a particular version of Bluez stack.
 
 # PREREQUISITES
 GO language 
