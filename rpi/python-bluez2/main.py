@@ -31,13 +31,10 @@ class TempCharacteristic:
 
     def get_temp(self):
         """
-        This routine does a mock reading CPU temperature callback.
+        This routine gets CPU temperature
         """
-        temp = random.randrange(3200, 5310, 10) / 100.0
-
         cpu = CPUTemperature()
         temp = cpu.temperature
-
         if self.unit.is_farenheit():
             temp = (temp * 1.8) + 32
         return temp
