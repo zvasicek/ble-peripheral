@@ -6,10 +6,15 @@ Python uses Bluez library via bluezero (DBUS)
 Bluez
 Python 3.7+
 
-```console
+The mandatory Python packages:
+```
 $ sudo pip3 install dbus-python
 $ sudo pip3 install bluezero
-$ sudo pip3 install gpiozero
+```
+
+Optional package for reading the real CPU temperature:
+```
+$ sudo pip3 install gpiozero RPi.GPIO
 ```
 
 # EXAMPLE
@@ -34,8 +39,7 @@ $ source ble-env/bin/activate
 (ble-env) $ pip3 install dbus-python
 (ble-env) $ pip3 install PyGObject
 (ble-env) $ pip3 install bluezero
-#for CPU temperature
-(ble-env) $ pip3 install gpiozero RPi.GPIO
+(ble-env) $ pip3 install gpiozero RPi.GPIO  # optional package for reading the real CPU temperature
 
 (ble-env) $ sudo ble-env/bin/python3.7 main.py
 ```
