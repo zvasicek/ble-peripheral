@@ -6,7 +6,13 @@ from bluezero import async_tools
 from bluezero import adapter
 from bluezero import peripheral
 
-from gpiozero import CPUTemperature
+try:
+    from gpiozero import CPUTemperature as CPUTemp
+    CPUTemperature = lambda : (CPUTemp()).temperature
+except:
+    CPUTemperature = lambda : random.randrange(3200,7000,1)/100.0
+    pass
+
 
 # Custom 128-bit service uuid (can be generated at https://www.uuidgenerator.net/)
 CPU_TMP_SRVC = '9941f656-8e3e-11eb-8dcd-0242ac130003'
@@ -33,8 +39,7 @@ class TempCharacteristic:
         """
         This routine gets CPU temperature
         """
-        cpu = CPUTemperature()
-        temp = cpu.temperature
+        temp = CPUTemperature()
         if self.unit.is_farenheit():
             temp = (temp * 1.8) + 32
         return temp
