@@ -4,7 +4,7 @@ GO implementation uses Host Controller Interface (HCI), it does not depend eithe
 # PREREQUISITES
 GO language 
 
-```console
+```
 $ sudo apt-get install golang
 $ go version
 go version go1.16.2 linux/arm
@@ -12,7 +12,9 @@ go version go1.16.2 linux/arm
 
 # EXAMPLE
 
-```console
+Compilation of the application:
+
+```
 $ cd go-hci
 $ go mod download github.com/paypal/gatt
 $ go build -o ble . 
@@ -20,13 +22,13 @@ $ go build -o ble .
 
 The resulting executable must either be run as root, 
 
-```console
+```
 $ sudo ./ble
 ```
 
 or be granted appropriate capabilities:
 
-```console
+```
 $ sudo setcap 'cap_net_raw,cap_net_admin=eip' ./ble
 $ ./ble
 ```
