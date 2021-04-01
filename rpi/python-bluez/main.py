@@ -2,7 +2,14 @@ import dbus
 
 from bluezbledbus.advertisement import Advertisement
 from bluezbledbus.ble import Application, Service, Characteristic, Descriptor
-from gpiozero import CPUTemperature
+
+try:
+    from gpiozero import CPUTemperature as CPUTemp
+    CPUTemperature = lambda : (CPUTemp()).temperature
+except:
+    CPUTemperature = lambda : random.randrange(3200,7000,1)/100.0
+    pass
+
 
 GATT_CHRC_IFACE = "org.bluez.GattCharacteristic1"
 NOTIFY_TIMEOUT = 5000
