@@ -2,6 +2,7 @@ import dbus, struct
 
 from bluezbledbus.advertisement import Advertisement
 from bluezbledbus.ble import Application, Service, Characteristic, Descriptor
+from bluezbledbus.bletools import struct_to_list
 
 try:
     from gpiozero import CPUTemperature as CPUTemp
@@ -63,7 +64,7 @@ class TempCharacteristic(Characteristic):
             temp = (temp * 1.8) + 32
             unit = "F"
         
-        return struct.pack('<hc',int(temp), unit) #list(int(temp * 100).to_bytes(2, byteorder='little', signed=True)) + [ord(unit)]
+        return struct_to_list('<hc',int(temp), unit)
 
     def set_temperature_callback(self):
         if self.notifying:

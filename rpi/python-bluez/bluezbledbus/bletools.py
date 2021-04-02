@@ -1,4 +1,5 @@
 import dbus
+import struct, array
 
 BLUEZ_SERVICE_NAME = "org.bluez"
 LE_ADVERTISING_MANAGER_IFACE = "org.bluez.LEAdvertisingManager1"
@@ -32,3 +33,6 @@ class BleTools(object):
         print("current power state:","ON" if pwr == dbus.Boolean(1) else "OFF")
         if pwr != dbus.Boolean(1):
             adapter_props.Set("org.bluez.Adapter1", "Powered", dbus.Boolean(1))
+
+def struct_to_list(format, *args):
+    return array.array('B',struct.pack(format, *args))
