@@ -1,4 +1,4 @@
-import dbus
+import dbus, struct
 
 from bluezbledbus.advertisement import Advertisement
 from bluezbledbus.ble import Application, Service, Characteristic, Descriptor
@@ -58,13 +58,12 @@ class TempCharacteristic(Characteristic):
         value = []
         unit = "C"
 
-        cpu = CPUTemperature()
-        temp = cpu.temperature
+        temp = CPUTemperature()
         if self.service.is_farenheit():
             temp = (temp * 1.8) + 32
             unit = "F"
         
-        return list(int(temp * 100).to_bytes(2, byteorder='little', signed=True)) + [ord(unit)]
+        return struct.pack('<hc',int(temp), unit) #list(int(temp * 100).to_bytes(2, byteorder='little', signed=True)) + [ord(unit)]
 
     def set_temperature_callback(self):
         if self.notifying:
