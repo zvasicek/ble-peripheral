@@ -190,14 +190,14 @@
             .then(characteristic => {
                 log('Enabling notifications ...');
                 tempCharacteristic = characteristic;
-                return tempCharacteristic.startNotifications().then(_ => {
-                    log('> Notifications started');
-                    tempCharacteristic.addEventListener('characteristicvaluechanged',
+                tempCharacteristic.addEventListener('characteristicvaluechanged',
                         event => {
                             // handleNotifications
                             let value = event.target.value;
                             showtemp(value);
                         });
+                return tempCharacteristic.startNotifications().then(_ => {
+                    log('> Notifications started');
                 });
             })
 
