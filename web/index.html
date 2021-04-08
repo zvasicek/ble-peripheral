@@ -115,7 +115,7 @@
 
     function setunit(unit) {
         if (unitCharacteristic) {
-            log('Writing value to Temp Characteristic...');
+            log('Writing value to Unit Characteristic...');
             let val = Uint8Array.of(unit.charCodeAt(0));
             actualUnit = '';
             unitCharacteristic.writeValue(val).then(_ => {
